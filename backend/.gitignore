@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+build/
+.dart_tool/
+
+# Firebase service-account credentials — NEVER commit these
+service-account.json
+*-service-account.json
+serviceAccountKey.json
+*firebase-adminsdk*.json

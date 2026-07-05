@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "191097805539",
+    "project_id": "firstdiner-473d4f",
+    "storage_bucket": "firstdiner-473d4f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:191097805539:android:f263d89e455641324f43d6",
+        "android_client_info": {
+          "package_name": "com.firstdiner.firstdiner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBNmjl4M5aA6I-gcrMRd9dgM6CfRqgOYw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

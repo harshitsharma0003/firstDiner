@@ -1,0 +1,20 @@
+node_modules/
+dist/
+.env
+build/
+.dart_tool/
+
+# Secrets — never commit these
+service-account.json
+**/service-account.json
+*-service-account.json
+*.keystore
+*.jks
+key.properties
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+
+# Claude Code local settings
+.claude/
