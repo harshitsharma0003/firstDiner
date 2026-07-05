@@ -1,0 +1,28 @@
+# Render Blueprint — deploys the firstDiner backend as a free web service.
+# https://render.com  →  New +  →  Blueprint  →  connect this repo.
+#
+# One manual step after the first deploy (secrets can't live in this file):
+# add the Firebase service-account key as a Secret File. See DEPLOY.md.
+services:
+  - type: web
+    name: firstdiner-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      # Use Firestore (the seeded prod data lives there already).
+      - key: DATA_STORE
+        value: firestore
+      # Production customer auth is Firebase phone auth; disable the dev OTP path.
+      - key: EXPOSE_OTP
+        value: "false"
+      # Points firebase-admin at the Secret File you add in the dashboard.
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        value: /etc/secrets/service-account.json
+      # Render generates a strong secret for signing app JWTs.
+      - key: JWT_SECRET
+        generateValue: true
