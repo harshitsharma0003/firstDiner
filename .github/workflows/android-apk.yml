@@ -16,9 +16,6 @@ name: Build Android APK
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'mobile/**'
-      - '.github/workflows/android-apk.yml'
   workflow_dispatch:
     inputs:
       mode:
@@ -68,3 +65,4 @@ jobs:
           name: firstDiner-apk-b${{ github.run_number }}
           path: mobile/firstDiner-*.apk
           if-no-files-found: error
+          retention-days: 30
