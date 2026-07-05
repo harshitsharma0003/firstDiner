@@ -23,6 +23,9 @@ on:
         type: choice
         options: [ release, debug ]
         default: release
+      api_base:
+        description: 'Backend API base URL baked into the app (e.g. https://xxxx.trycloudflare.com/api). Leave blank for the dev default.'
+        default: ''
 
 jobs:
   build:
@@ -51,7 +54,13 @@ jobs:
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --${{ github.event.inputs.mode || 'release' }} --build-number=${{ github.run_number }}
+        run: |
+          EXTRA=""
+          if [ -n "${{ github.event.inputs.api_base }}" ]; then
+            EXTRA="--dart-define=API_BASE=${{ github.event.inputs.api_base }}"
+            echo "Baking API_BASE=${{ github.event.inputs.api_base }}"
+          fi
+          flutter build apk --${{ github.event.inputs.mode || 'release' }} --build-number=${{ github.run_number }} $EXTRA
 
       - name: Name APK with build number
         run: |
