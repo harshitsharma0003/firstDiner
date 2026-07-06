@@ -58,6 +58,24 @@ router.post('/customer/firebase', async (req, res) => {
   }
 });
 
+// ---- Customer: demo test login (static OTP, no SMS) ----
+// For a hardcoded demo number, skip Firebase and accept the paired static code.
+// DEMO ONLY: anyone who knows the number + code can sign in as it.
+router.post('/customer/test-verify', async (req, res) => {
+  const { phone, code } = req.body || {};
+  const expected = config.testPhoneNumbers[phone];
+  if (!expected || String(code) !== expected) {
+    return res.status(401).json({ error: 'That code is wrong.' });
+  }
+  try {
+    const customer = await store.upsertCustomerByPhone(phone);
+    const token = signToken({ sub: customer.id, role: 'customer', phone });
+    res.json({ token, role: 'customer', phone });
+  } catch (err) {
+    res.status(503).json({ error: 'Could not reach the database. Please try again.' });
+  }
+});
+
 // ---- Customer: request OTP (DEV ONLY) ----
 // Returns the code in the response so you can test without SMS. Disabled when
 // EXPOSE_OTP=false — production uses POST /customer/firebase above.

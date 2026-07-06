@@ -59,6 +59,13 @@ class ApiClient {
     return token!;
   }
 
+  /// Demo bypass: log in with a hardcoded test number + static code (no SMS).
+  Future<String> testLogin(String phone, String code) async {
+    final data = await _post('/auth/customer/test-verify', {'phone': phone, 'code': code});
+    token = data['token'];
+    return token!;
+  }
+
   // ---- dev OTP (local testing only; backend must have EXPOSE_OTP=true) ----
   Future<String?> requestOtp(String phone) async {
     final data = await _post('/auth/customer/request-otp', {'phone': phone});

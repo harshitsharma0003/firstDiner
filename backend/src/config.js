@@ -20,6 +20,13 @@ const config = {
   // In production set this to false and wire Firebase Phone Auth on the client.
   exposeOtpInResponse: process.env.EXPOSE_OTP !== 'false',
 
+  // Demo bypass numbers: entering one of these skips real SMS and accepts the
+  // paired static code. FOR DEMOS ONLY — anyone with the number + code can sign
+  // in as it. Remove before any real launch.
+  testPhoneNumbers: {
+    '+919968225190': '123456',
+  },
+
   // Seeded platform admin (change before deploying).
   seedAdmin: {
     username: process.env.ADMIN_USERNAME || 'admin',

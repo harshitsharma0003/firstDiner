@@ -18,9 +18,18 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _busy = false;
   String? _error;
   String? _verificationId; // set once Firebase has sent the SMS
+  bool _demo = false; // demo bypass number: static OTP, no SMS
+
+  // Demo bypass numbers: skip Firebase/SMS and accept a static code.
+  static const _demoNumbers = {'+919968225190'};
 
   /// Step 1: ask Firebase to send an SMS to the entered number.
   Future<void> _sendCode() async {
+    // Demo bypass: reveal the OTP field without sending any SMS.
+    if (_demoNumbers.contains(_phoneCtrl.text.trim())) {
+      setState(() { _demo = true; _otpSent = true; _busy = false; _error = null; });
+      return;
+    }
     setState(() { _busy = true; _error = null; });
     try {
       await FirebaseAuth.instance.verifyPhoneNumber(
@@ -47,6 +56,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
   /// Step 2: combine the entered code with the verificationId and sign in.
   Future<void> _verify() async {
+    // Demo bypass: accept the static code via the backend test endpoint.
+    if (_demo) {
+      setState(() { _busy = true; _error = null; });
+      try {
+        final app = context.read<AppState>();
+        final jwt = await app.api.testLogin(_phoneCtrl.text.trim(), _codeCtrl.text.trim());
+        await app.signIn(jwt, _phoneCtrl.text.trim());
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
+      } catch (e) {
+        if (mounted) setState(() { _error = e.toString(); });
+      } finally {
+        if (mounted) setState(() { _busy = false; });
+      }
+      return;
+    }
     final id = _verificationId;
     if (id == null) return;
     setState(() { _busy = true; _error = null; });
@@ -124,7 +149,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: ElevatedButton(onPressed: _busy ? null : _verify,
                       child: Text(_busy ? 'Verifying…' : 'Verify & continue')),
                 ),
-                TextButton(onPressed: () => setState(() => _otpSent = false), child: const Text('Use a different number')),
+                TextButton(onPressed: () => setState(() { _otpSent = false; _demo = false; _verificationId = null; }), child: const Text('Use a different number')),
               ],
             ],
           ),
