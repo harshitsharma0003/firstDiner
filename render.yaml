@@ -1,8 +1,11 @@
-# Render Blueprint — deploys the firstDiner backend as a free web service.
+# Render Blueprint — deploys the whole firstDiner stack:
+#   1. firstdiner-api  — the Node backend (web service)
+#   2. firstdiner-web  — the admin + restaurant console (static site)
 # https://render.com  →  New +  →  Blueprint  →  connect this repo.
 #
-# One manual step after the first deploy (secrets can't live in this file):
-# add the Firebase service-account key as a Secret File. See DEPLOY.md.
+# Two manual steps after the first deploy (see DEPLOY.md):
+#   - add the Firebase service-account key to firstdiner-api as a Secret File
+#   - set VITE_API_BASE on firstdiner-web to the api URL + /api, then redeploy
 services:
   - type: web
     name: firstdiner-api
@@ -26,3 +29,20 @@ services:
       # Render generates a strong secret for signing app JWTs.
       - key: JWT_SECRET
         generateValue: true
+
+  # Admin + restaurant console (one React app, role-switched at login).
+  - type: web
+    name: firstdiner-web
+    runtime: static
+    rootDir: web
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      # Set this to the firstdiner-api URL + /api after the first deploy,
+      # e.g. https://firstdiner-api.onrender.com/api
+      - key: VITE_API_BASE
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

@@ -2,6 +2,10 @@
 const TOKEN_KEY = 'firstdiner_token';
 const SESSION_KEY = 'firstdiner_session';
 
+// API base: set VITE_API_BASE to the hosted backend (e.g. https://firstdiner-api.onrender.com/api)
+// when building for production. Falls back to '/api' so the Vite dev proxy works locally.
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
+
 export function saveSession(token, session) {
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(SESSION_KEY, JSON.stringify(session));
@@ -22,7 +26,7 @@ export function clearSession() {
 }
 
 async function request(path, { method = 'GET', body, token } = {}) {
-  const res = await fetch(`/api${path}`, {
+  const res = await fetch(`${API_BASE}${path}`, {
     method,
     headers: {
       'Content-Type': 'application/json',
