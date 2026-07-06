@@ -53,6 +53,11 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Use the committed debug keystore (stable signing SHA for Firebase)
+        run: |
+          mkdir -p "$HOME/.android"
+          cp android/debug.keystore "$HOME/.android/debug.keystore"
+
       - name: Install dependencies
         run: flutter pub get
 
