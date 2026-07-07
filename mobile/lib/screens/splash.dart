@@ -48,9 +48,9 @@ class _SplashScreenState extends State<SplashScreen> {
               children: [
                 const Spacer(),
                 RichText(
-                  text: const TextSpan(
-                    style: TextStyle(fontSize: 40, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: -0.5),
-                    children: [
+                  text: TextSpan(
+                    style: fraunces(fontSize: 42, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: -0.5),
+                    children: const [
                       TextSpan(text: 'first'),
                       TextSpan(text: 'Diner', style: TextStyle(color: AppColors.honey)),
                     ],
@@ -71,8 +71,8 @@ class _SplashScreenState extends State<SplashScreen> {
                       Text('FAMILY OUTINGS, FOR LESS',
                           style: TextStyle(color: AppColors.honey, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.5)),
                       const SizedBox(height: 8),
-                      const Text('Up to 60% off the food.\nEvery weeknight.',
-                          style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w600, height: 1.25)),
+                      Text('Up to 60% off the food.\nEvery weeknight.',
+                          style: fraunces(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w600, height: 1.2)),
                       const SizedBox(height: 8),
                       Text('Book a table, enjoy one drink, save on the rest.',
                           style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 14)),

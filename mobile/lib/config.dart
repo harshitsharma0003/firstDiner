@@ -1,4 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+/// Fraunces display face — headings, the wordmark, prices. Matches the web console.
+TextStyle fraunces({
+  double? fontSize,
+  FontWeight fontWeight = FontWeight.w600,
+  Color? color,
+  double? letterSpacing,
+  double? height,
+}) =>
+    GoogleFonts.fraunces(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+    );
 
 class Config {
   // Point this at your backend.
@@ -29,40 +46,53 @@ class AppColors {
 
 ThemeData buildTheme() {
   final base = ThemeData(useMaterial3: true, brightness: Brightness.light);
+  final textTheme = GoogleFonts.interTextTheme(base.textTheme)
+      .apply(bodyColor: AppColors.ink, displayColor: AppColors.ink);
   return base.copyWith(
     scaffoldBackgroundColor: AppColors.paper,
     colorScheme: base.colorScheme.copyWith(
       primary: AppColors.honey,
       secondary: AppColors.sage,
       surface: AppColors.surface,
+      onPrimary: Colors.white,
     ),
-    textTheme: base.textTheme.apply(bodyColor: AppColors.ink, displayColor: AppColors.ink),
-    appBarTheme: const AppBarTheme(
+    textTheme: textTheme,
+    appBarTheme: AppBarTheme(
       backgroundColor: AppColors.surface,
       foregroundColor: AppColors.ink,
       elevation: 0,
+      scrolledUnderElevation: 0.5,
       surfaceTintColor: Colors.transparent,
+      shape: const Border(bottom: BorderSide(color: AppColors.line)),
+      titleTextStyle: fraunces(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.ink),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.honey,
         foregroundColor: Colors.white,
         elevation: 0,
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+        shadowColor: Colors.transparent,
+        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 15),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: AppColors.surface,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      hintStyle: const TextStyle(color: AppColors.inkSoft),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.line),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.line),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.honey, width: 2),
       ),
     ),
   );

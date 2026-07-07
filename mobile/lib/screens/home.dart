@@ -47,9 +47,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: RichText(
-          text: const TextSpan(
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.ink),
-            children: [TextSpan(text: 'first'), TextSpan(text: 'Diner', style: TextStyle(color: AppColors.honeyDeep))],
+          text: TextSpan(
+            style: fraunces(fontSize: 21, fontWeight: FontWeight.w700, color: AppColors.ink),
+            children: const [TextSpan(text: 'first'), TextSpan(text: 'Diner', style: TextStyle(color: AppColors.honeyDeep))],
           ),
         ),
         actions: [
@@ -124,11 +124,14 @@ class _RestaurantCard extends StatelessWidget {
       onTap: () => Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => RestaurantDetailScreen(restaurant: restaurant))),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 14),
+        margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: AppColors.line),
+          boxShadow: [
+            BoxShadow(color: AppColors.ink.withOpacity(0.06), blurRadius: 24, offset: const Offset(0, 10)),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,8 +148,12 @@ class _RestaurantCard extends StatelessWidget {
                   Positioned(
                     top: 12, left: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(color: AppColors.honey, borderRadius: BorderRadius.circular(999)),
+                      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(colors: [AppColors.honey, AppColors.honeyDeep]),
+                        borderRadius: BorderRadius.circular(999),
+                        boxShadow: [BoxShadow(color: AppColors.honeyDeep.withOpacity(0.45), blurRadius: 8, offset: const Offset(0, 2))],
+                      ),
                       child: Text('${restaurant.discountPercent}% off food',
                           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12)),
                     ),
@@ -159,7 +166,7 @@ class _RestaurantCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(restaurant.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                  Text(restaurant.name, style: fraunces(fontSize: 19, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 2),
                   Row(children: [
                     const Icon(Icons.place_outlined, size: 15, color: AppColors.inkSoft),

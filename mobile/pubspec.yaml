@@ -13,6 +13,7 @@ dependencies:
   provider: ^6.1.2
   shared_preferences: ^2.2.3
   intl: ^0.19.0
+  google_fonts: ^6.2.1   # Inter (UI) + Fraunces (display), matching the web console
 
   # Production phone auth (see lib/api_client.dart + lib/screens/login.dart).
   # `flutterfire configure` may bump these to versions matching your Flutter SDK.

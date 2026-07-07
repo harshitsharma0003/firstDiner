@@ -109,9 +109,9 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: 24),
               RichText(
-                text: const TextSpan(
-                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700, color: AppColors.ink, letterSpacing: -0.5),
-                  children: [TextSpan(text: 'first'), TextSpan(text: 'Diner', style: TextStyle(color: AppColors.honeyDeep))],
+                text: TextSpan(
+                  style: fraunces(fontSize: 32, fontWeight: FontWeight.w700, color: AppColors.ink, letterSpacing: -0.5),
+                  children: const [TextSpan(text: 'first'), TextSpan(text: 'Diner', style: TextStyle(color: AppColors.honeyDeep))],
                 ),
               ),
               const SizedBox(height: 6),
