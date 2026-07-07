@@ -46,6 +46,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leadingWidth: 46,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 14),
+          child: Image.asset('assets/icon/logo.png', height: 26),
+        ),
         title: RichText(
           text: TextSpan(
             style: fraunces(fontSize: 21, fontWeight: FontWeight.w700, color: AppColors.ink),

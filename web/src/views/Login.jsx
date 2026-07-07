@@ -28,11 +28,12 @@ export default function Login({ onAuth }) {
   return (
     <div className="center-screen">
       <div className="auth-card card">
-        <div style={{ marginBottom: 18 }}>
-          <span className="mark" style={{ fontFamily: 'Fraunces, serif', fontSize: '1.5rem', fontWeight: 700 }}>
+        <div style={{ marginBottom: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+          <img src="/logo.png" alt="firstDiner" style={{ height: 64, marginBottom: 12 }} />
+          <span className="mark" style={{ fontFamily: 'Fraunces, serif', fontSize: '1.6rem', fontWeight: 700 }}>
             first<b style={{ color: 'var(--honey-deep)' }}>Diner</b>
           </span>
-          <p className="muted" style={{ margin: '6px 0 0' }}>Console sign-in</p>
+          <p className="muted" style={{ margin: '4px 0 0' }}>Console sign-in</p>
         </div>
 
         <div className="tab-row">

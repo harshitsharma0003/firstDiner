@@ -71,7 +71,8 @@ a:hover { text-decoration: underline; }
   content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
   background: linear-gradient(90deg, transparent, rgba(201, 133, 47, 0.5), transparent);
 }
-.brand { display: flex; align-items: baseline; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 11px; }
+.brand-logo { height: 30px; width: auto; display: block; }
 .brand .mark { font-family: 'Fraunces', serif; font-weight: 700; font-size: 1.3rem; letter-spacing: -0.02em; }
 .brand .mark b { color: var(--honey-deep); }
 .brand .role {

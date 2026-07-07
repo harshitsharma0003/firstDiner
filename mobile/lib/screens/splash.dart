@@ -47,6 +47,16 @@ class _SplashScreenState extends State<SplashScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Spacer(),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.28), blurRadius: 28, offset: const Offset(0, 10))],
+                  ),
+                  child: Image.asset('assets/icon/logo.png', height: 76),
+                ),
+                const SizedBox(height: 26),
                 RichText(
                   text: TextSpan(
                     style: fraunces(fontSize: 42, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: -0.5),
