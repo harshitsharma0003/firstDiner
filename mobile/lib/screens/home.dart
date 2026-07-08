@@ -54,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: RichText(
           text: TextSpan(
             style: fraunces(fontSize: 21, fontWeight: FontWeight.w700, color: AppColors.ink),
-            children: const [TextSpan(text: 'first'), TextSpan(text: 'Diner', style: TextStyle(color: AppColors.honeyDeep))],
+            children: const [TextSpan(text: 'First '), TextSpan(text: 'Diner', style: TextStyle(color: AppColors.honeyDeep))],
           ),
         ),
         actions: [

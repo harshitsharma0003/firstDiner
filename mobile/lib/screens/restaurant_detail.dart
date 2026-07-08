@@ -67,14 +67,21 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                   errorBuilder: (_, __, ___) => const SizedBox.shrink()),
             ),
           const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(color: AppColors.honey, borderRadius: BorderRadius.circular(999)),
-            child: Text('${r.discountPercent}% off all food',
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [AppColors.honey, AppColors.honeyDeep]),
+                borderRadius: BorderRadius.circular(999),
+                boxShadow: [BoxShadow(color: AppColors.honeyDeep.withOpacity(0.4), blurRadius: 8, offset: const Offset(0, 2))],
+              ),
+              child: Text('${r.discountPercent}% off all food',
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
+            ),
           ),
           const SizedBox(height: 14),
-          Text(r.name, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
+          Text(r.name, style: fraunces(fontSize: 26, fontWeight: FontWeight.w600)),
           const SizedBox(height: 4),
           Text([r.address, r.city].where((s) => s.isNotEmpty).join(', '),
               style: const TextStyle(color: AppColors.inkSoft)),
@@ -85,7 +92,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           const Divider(height: 36, color: AppColors.line),
 
           // Date selector
-          const Text('Pick a date', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+          Text('Pick a date', style: fraunces(fontWeight: FontWeight.w600, fontSize: 18)),
           const SizedBox(height: 10),
           InkWell(
             onTap: _pickDate,
@@ -109,7 +116,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           ),
           const SizedBox(height: 20),
 
-          const Text('Available times', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+          Text('Available times', style: fraunces(fontWeight: FontWeight.w600, fontSize: 18)),
           const SizedBox(height: 4),
           const Text('Each booking holds one table for 1 hour, up to 4 guests.',
               style: TextStyle(color: AppColors.inkSoft, fontSize: 13)),
@@ -142,9 +149,10 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             decoration: BoxDecoration(
               color: available ? AppColors.sageBg : AppColors.clayBg,
               borderRadius: BorderRadius.circular(12),
+              boxShadow: available ? [BoxShadow(color: AppColors.sage.withOpacity(0.15), blurRadius: 10, offset: const Offset(0, 4))] : null,
             ),
             child: Column(children: [
-              Text(slot.timeSlot, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+              Text(slot.timeSlot, style: fraunces(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.ink)),
               const SizedBox(height: 2),
               Text(
                 available ? '${slot.remaining} table${slot.remaining == 1 ? '' : 's'} left' : 'Tables not available',

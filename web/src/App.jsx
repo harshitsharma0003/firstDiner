@@ -19,7 +19,7 @@ export default function App() {
       <header className="topbar">
         <div className="brand">
           <img src="/logo.png" alt="" className="brand-logo" />
-          <span className="mark">first<b>Diner</b></span>
+          <span className="mark">First <b>Diner</b></span>
           <span className="role">{session.role === 'admin' ? 'Admin console' : 'Restaurant console'}</span>
         </div>
         <div className="spread">

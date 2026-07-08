@@ -95,7 +95,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(b.timeSlot, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+              Text(b.timeSlot, style: fraunces(fontSize: 21, fontWeight: FontWeight.w600, color: AppColors.ink)),
               Text(dateLabel, style: const TextStyle(color: AppColors.inkSoft, fontSize: 12)),
             ],
           ),
@@ -104,7 +104,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(b.restaurantName, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                Text(b.restaurantName, style: fraunces(fontWeight: FontWeight.w600, fontSize: 16, color: AppColors.ink)),
                 const SizedBox(height: 2),
                 Text('${b.partySize} ${b.partySize == 1 ? 'guest' : 'guests'} · ${b.discountApplied}% off',
                     style: const TextStyle(color: AppColors.inkSoft, fontSize: 13)),

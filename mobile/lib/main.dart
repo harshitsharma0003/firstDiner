@@ -22,7 +22,7 @@ class FirstDinerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'firstDiner',
+      title: 'First Diner',
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
       home: const SplashScreen(),

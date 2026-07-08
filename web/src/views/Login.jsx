@@ -31,7 +31,7 @@ export default function Login({ onAuth }) {
         <div style={{ marginBottom: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
           <img src="/logo.png" alt="firstDiner" style={{ height: 64, marginBottom: 12 }} />
           <span className="mark" style={{ fontFamily: 'Fraunces, serif', fontSize: '1.6rem', fontWeight: 700 }}>
-            first<b style={{ color: 'var(--honey-deep)' }}>Diner</b>
+            First <b style={{ color: 'var(--honey-deep)' }}>Diner</b>
           </span>
           <p className="muted" style={{ margin: '4px 0 0' }}>Console sign-in</p>
         </div>
@@ -57,10 +57,6 @@ export default function Login({ onAuth }) {
           </button>
         </form>
 
-        <hr className="soft" />
-        <p className="muted" style={{ fontSize: '0.82rem', margin: 0 }}>
-          Demo logins — Admin: <b>admin / admin123</b> · Restaurant: <b>spice / spice123</b>
-        </p>
       </div>
     </div>
   );

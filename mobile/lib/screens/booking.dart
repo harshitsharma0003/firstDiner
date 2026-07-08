@@ -65,7 +65,7 @@ class _BookingScreenState extends State<BookingScreen> {
             const CircleAvatar(radius: 28, backgroundColor: AppColors.sageBg,
                 child: Icon(Icons.check, color: AppColors.sage, size: 30)),
             const SizedBox(height: 16),
-            const Text('Table booked', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+            Text('Table booked', style: fraunces(fontSize: 22, fontWeight: FontWeight.w600, color: AppColors.ink)),
             const SizedBox(height: 6),
             Text(
               '${widget.restaurant.name} · ${DateFormat('d MMM').format(DateTime.parse(widget.date))} at ${widget.timeSlot}\nfor $_partySize ${_partySize == 1 ? 'guest' : 'guests'}',
@@ -103,11 +103,12 @@ class _BookingScreenState extends State<BookingScreen> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.line),
+              boxShadow: [BoxShadow(color: AppColors.ink.withOpacity(0.06), blurRadius: 20, offset: const Offset(0, 8))],
             ),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(widget.restaurant.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              Text(widget.restaurant.name, style: fraunces(fontSize: 20, fontWeight: FontWeight.w600)),
               const SizedBox(height: 6),
               _summaryRow(Icons.calendar_today_outlined, dateLabel),
               _summaryRow(Icons.schedule, '${widget.timeSlot} · 1 hour'),

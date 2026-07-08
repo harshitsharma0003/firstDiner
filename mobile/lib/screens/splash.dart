@@ -61,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   text: TextSpan(
                     style: fraunces(fontSize: 42, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: -0.5),
                     children: const [
-                      TextSpan(text: 'first'),
+                      TextSpan(text: 'First '),
                       TextSpan(text: 'Diner', style: TextStyle(color: AppColors.honey)),
                     ],
                   ),
