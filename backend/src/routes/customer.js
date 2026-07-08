@@ -3,6 +3,7 @@ const express = require('express');
 const store = require('../data/store');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { buildDayAvailability, validateBooking } = require('../logic/availability');
+const { sendEmail } = require('../services/email');
 
 const router = express.Router();
 
@@ -112,8 +113,25 @@ router.post('/bookings', authenticate, requireRole('customer'), async (req, res)
           })
         )
       );
+      // Email the restaurant owner the booking details.
+      const owner = staff.find((u) => u.role === 'owner');
+      if (owner && owner.email) {
+        await sendEmail({
+          to: owner.email,
+          subject: `New booking — ${restaurant.name}`,
+          html: `<div style="font-family:Arial,sans-serif;color:#241d2b">
+            <h2 style="margin:0 0 10px">New booking at ${restaurant.name}</h2>
+            <table style="border-collapse:collapse;font-size:15px">
+              <tr><td style="padding:3px 14px 3px 0"><b>Name</b></td><td>${bookingName}</td></tr>
+              <tr><td style="padding:3px 14px 3px 0"><b>Guests</b></td><td>${Number(partySize)}</td></tr>
+              <tr><td style="padding:3px 14px 3px 0"><b>Date</b></td><td>${date}</td></tr>
+              <tr><td style="padding:3px 14px 3px 0"><b>Time</b></td><td>${timeSlot}</td></tr>
+              <tr><td style="padding:3px 14px 3px 0"><b>Contact</b></td><td>${contactNumber}</td></tr>
+            </table></div>`,
+        });
+      }
     } catch (err) {
-      console.error('notification create failed', err);
+      console.error('booking notification/email failed', err);
     }
   })();
 });

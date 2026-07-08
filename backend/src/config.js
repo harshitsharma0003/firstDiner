@@ -32,6 +32,12 @@ const config = {
     username: process.env.ADMIN_USERNAME || 'admin',
     password: process.env.ADMIN_PASSWORD || 'admin123',
   },
+
+  // Email (Resend). Leave RESEND_API_KEY unset to disable sending (dev).
+  // RESEND_FROM must be a verified sender/domain in your Resend account.
+  resendApiKey: process.env.RESEND_API_KEY || '',
+  resendFrom: process.env.RESEND_FROM || 'First Diner <onboarding@resend.dev>',
+  adminEmail: process.env.ADMIN_EMAIL || '', // for admin password reset
 };
 
 module.exports = config;

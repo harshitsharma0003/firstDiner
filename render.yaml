@@ -32,6 +32,14 @@ services:
       # Render generates a strong secret for signing app JWTs.
       - key: JWT_SECRET
         generateValue: true
+      # Email (Resend) — set these in the dashboard to enable password-reset +
+      # booking-alert emails. RESEND_FROM must be a verified sender in Resend.
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
 
   # Admin + restaurant console (one React app, role-switched at login).
   - type: web

@@ -2,8 +2,9 @@
 const express = require('express');
 const store = require('../data/store');
 const config = require('../config');
-const { verifyPassword, signToken } = require('../auth/auth');
+const { verifyPassword, signToken, hashPassword, generatePassword } = require('../auth/auth');
 const { verifyFirebaseIdToken } = require('../auth/firebaseAuth');
+const { sendEmail } = require('../services/email');
 
 const router = express.Router();
 
@@ -33,6 +34,40 @@ router.post('/restaurant/login', async (req, res) => {
     username: user.username,
   });
   res.json({ token, role: 'restaurant', restaurantRole: user.role, username: user.username });
+});
+
+// ---- Forgot password (admin or restaurant user) — emails a new password ----
+router.post('/forgot-password', async (req, res) => {
+  const email = (req.body && req.body.email ? String(req.body.email) : '').trim().toLowerCase();
+  if (!email) return res.status(400).json({ error: 'Enter your email.' });
+  try {
+    let admin = await store.findAdminByEmail(email);
+    // Fallback: the seeded admin has no email field — match against ADMIN_EMAIL.
+    if (!admin && config.adminEmail && email === config.adminEmail.trim().toLowerCase()) {
+      admin = await store.findAdminByUsername(config.seedAdmin.username);
+    }
+    const account = admin || (await store.findRestaurantUserByEmail(email));
+    if (account) {
+      const newPassword = generatePassword();
+      const patch = { passwordHash: hashPassword(newPassword) };
+      if (admin) await store.updateAdmin(account.id, patch);
+      else await store.updateRestaurantUser(account.id, patch);
+      await sendEmail({
+        to: email,
+        subject: 'First Diner — your new console password',
+        html: `<div style="font-family:Arial,sans-serif;color:#241d2b">
+          <h2 style="margin:0 0 10px">Password reset</h2>
+          <p>Your First Diner console password has been reset.</p>
+          <p><b>Username:</b> ${account.username}<br/>
+             <b>New password:</b> <code style="background:#f5eee4;padding:2px 6px;border-radius:4px">${newPassword}</code></p>
+          <p>Sign in at the console and change it whenever you like.</p></div>`,
+      });
+    }
+    // Identical response whether or not the email exists (no account enumeration).
+    res.json({ ok: true, message: 'If that email is registered, a new password has been sent.' });
+  } catch (err) {
+    res.status(503).json({ error: 'Could not process the request. Please try again.' });
+  }
 });
 
 // ---- Customer: sign in with a Firebase ID token (PRODUCTION phone auth) ----

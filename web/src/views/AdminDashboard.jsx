@@ -6,7 +6,7 @@ export default function AdminDashboard({ session }) {
   const [error, setError] = useState('');
   const [creating, setCreating] = useState(false);
   const [newCreds, setNewCreds] = useState(null);
-  const [form, setForm] = useState({ name: '', username: '', city: '', address: '', description: '' });
+  const [form, setForm] = useState({ name: '', username: '', email: '', city: '', address: '', description: '' });
 
   async function refresh() {
     try {
@@ -26,11 +26,12 @@ export default function AdminDashboard({ session }) {
       const res = await api.createRestaurant(session.token, {
         name: form.name,
         username: form.username,
+        email: form.email,
         description: form.description,
         location: { city: form.city, address: form.address, lat: null, lng: null },
       });
       setNewCreds(res.credentials);
-      setForm({ name: '', username: '', city: '', address: '', description: '' });
+      setForm({ name: '', username: '', email: '', city: '', address: '', description: '' });
       setCreating(false);
       refresh();
     } catch (err) {
@@ -81,6 +82,8 @@ export default function AdminDashboard({ session }) {
               <div className="field"><label>Login username</label>
                 <input type="text" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} required /></div>
             </div>
+            <div className="field"><label>Owner email <span className="muted" style={{ fontWeight: 400 }}>(gets the login + booking alerts)</span></label>
+              <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="owner@restaurant.com" /></div>
             <div className="row">
               <div className="field"><label>City</label>
                 <input type="text" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>

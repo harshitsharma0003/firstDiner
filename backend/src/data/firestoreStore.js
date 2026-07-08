@@ -89,6 +89,13 @@ function createFirestoreStore() {
       const snap = await col('admins').where('username', '==', username).limit(1).get();
       return snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() };
     },
+    async findAdminByEmail(email) {
+      const snap = await col('admins').where('email', '==', String(email).toLowerCase()).limit(1).get();
+      return snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() };
+    },
+    async updateAdmin(id, patch) {
+      return patchDoc('admins', id, patch);
+    },
 
     // ---- restaurants ----
     async createRestaurant(data) {
@@ -118,6 +125,13 @@ function createFirestoreStore() {
     async listRestaurantUsers(restaurantId) {
       const snap = await col('restaurantUsers').where('restaurantId', '==', restaurantId).get();
       return rows(snap);
+    },
+    async findRestaurantUserByEmail(email) {
+      const snap = await col('restaurantUsers').where('email', '==', String(email).toLowerCase()).limit(1).get();
+      return snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() };
+    },
+    async updateRestaurantUser(id, patch) {
+      return patchDoc('restaurantUsers', id, patch);
     },
 
     // ---- customers ----

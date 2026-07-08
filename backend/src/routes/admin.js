@@ -4,6 +4,7 @@ const store = require('../data/store');
 const config = require('../config');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { hashPassword, generatePassword } = require('../auth/auth');
+const { sendEmail } = require('../services/email');
 
 const router = express.Router();
 router.use(authenticate, requireRole('admin'));
@@ -11,8 +12,9 @@ router.use(authenticate, requireRole('admin'));
 // Create a restaurant + generate its owner login. Returns the plaintext
 // password ONCE so the admin can hand it to the restaurant.
 router.post('/restaurants', async (req, res) => {
-  const { name, description, location, images, username } = req.body || {};
+  const { name, description, location, images, username, email } = req.body || {};
   if (!name || !username) return res.status(400).json({ error: 'Name and a login username are required.' });
+  const ownerEmail = email ? String(email).trim().toLowerCase() : '';
 
   const existing = await store.findRestaurantUserByUsername(username);
   if (existing) return res.status(409).json({ error: 'That username is already taken.' });
@@ -34,9 +36,23 @@ router.post('/restaurants', async (req, res) => {
   await store.createRestaurantUser({
     restaurantId: restaurant.id,
     username,
+    email: ownerEmail || undefined,
     passwordHash: hashPassword(password),
     role: 'owner',
   });
+
+  // Email the owner their login (fire-and-forget) if an email was provided.
+  if (ownerEmail) {
+    sendEmail({
+      to: ownerEmail,
+      subject: `Your First Diner console login — ${name}`,
+      html: `<div style="font-family:Arial,sans-serif;color:#241d2b">
+        <h2 style="margin:0 0 10px">Welcome to First Diner</h2>
+        <p>Your restaurant <b>${name}</b> is set up. Sign in to set your offer, capacity and see bookings:</p>
+        <p><b>Username:</b> ${username}<br/>
+           <b>Password:</b> <code style="background:#f5eee4;padding:2px 6px;border-radius:4px">${password}</code></p></div>`,
+    }).catch(() => {});
+  }
 
   res.status(201).json({ restaurant, credentials: { username, password } });
 });

@@ -33,6 +33,17 @@ function createMemoryStore() {
     async findAdminByUsername(username) {
       return all('admins').find((a) => a.username === username) || null;
     },
+    async findAdminByEmail(email) {
+      const e = String(email).toLowerCase();
+      return all('admins').find((a) => a.email && a.email.toLowerCase() === e) || null;
+    },
+    async updateAdmin(id, patch) {
+      const cur = db.admins.get(id);
+      if (!cur) return null;
+      const next = { ...cur, ...patch };
+      db.admins.set(id, next);
+      return next;
+    },
 
     // ---- restaurants ----
     async createRestaurant(data) {
@@ -69,6 +80,17 @@ function createMemoryStore() {
     },
     async listRestaurantUsers(restaurantId) {
       return all('restaurantUsers').filter((u) => u.restaurantId === restaurantId);
+    },
+    async findRestaurantUserByEmail(email) {
+      const e = String(email).toLowerCase();
+      return all('restaurantUsers').find((u) => u.email && u.email.toLowerCase() === e) || null;
+    },
+    async updateRestaurantUser(id, patch) {
+      const cur = db.restaurantUsers.get(id);
+      if (!cur) return null;
+      const next = { ...cur, ...patch };
+      db.restaurantUsers.set(id, next);
+      return next;
     },
 
     // ---- customers ----

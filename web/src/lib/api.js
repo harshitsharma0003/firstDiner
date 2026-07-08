@@ -43,6 +43,7 @@ export const api = {
   adminLogin: (username, password) => request('/auth/admin/login', { method: 'POST', body: { username, password } }),
   restaurantLogin: (username, password) =>
     request('/auth/restaurant/login', { method: 'POST', body: { username, password } }),
+  forgotPassword: (email) => request('/auth/forgot-password', { method: 'POST', body: { email } }),
 
   // admin
   listRestaurants: (token) => request('/admin/restaurants', { token }),
