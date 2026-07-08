@@ -87,6 +87,35 @@ router.post('/bookings', authenticate, requireRole('customer'), async (req, res)
     status: 'confirmed',
   });
   res.status(201).json({ booking });
+
+  // Fire-and-forget in-app notifications for both sides of the booking.
+  (async () => {
+    try {
+      const when = `${date} · ${timeSlot}`;
+      const guests = `${Number(partySize)} guest${Number(partySize) === 1 ? '' : 's'}`;
+      await store.createNotification({
+        userId: req.user.sub,
+        audience: 'customer',
+        type: 'booking_confirmed',
+        title: 'Booking confirmed',
+        body: `${restaurant.name} · ${when} · ${guests}`,
+      });
+      const staff = await store.listRestaurantUsers(restaurantId);
+      await Promise.all(
+        staff.map((u) =>
+          store.createNotification({
+            userId: u.id,
+            audience: 'restaurant',
+            type: 'new_booking',
+            title: 'New booking',
+            body: `${bookingName} · ${guests} · ${when}`,
+          })
+        )
+      );
+    } catch (err) {
+      console.error('notification create failed', err);
+    }
+  })();
 });
 
 // ---- A customer's own bookings ----

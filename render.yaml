@@ -23,6 +23,9 @@ services:
       # Production customer auth is Firebase phone auth; disable the dev OTP path.
       - key: EXPOSE_OTP
         value: "false"
+      # Demo bypass number (+919968225190 / 123456). Set to "false" for real launch.
+      - key: DEMO_LOGIN
+        value: "true"
       # Points firebase-admin at the Secret File you add in the dashboard.
       - key: GOOGLE_APPLICATION_CREDENTIALS
         value: /etc/secrets/service-account.json

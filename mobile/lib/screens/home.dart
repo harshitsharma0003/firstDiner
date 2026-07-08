@@ -5,6 +5,7 @@ import '../models.dart';
 import '../state/app_state.dart';
 import 'restaurant_detail.dart';
 import 'my_bookings.dart';
+import 'notifications.dart';
 import 'splash.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -18,11 +19,18 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Restaurant> _restaurants = [];
   bool _loading = true;
   String? _error;
+  int _unread = 0;
 
   @override
   void initState() {
     super.initState();
     _load();
+    _loadUnread();
+  }
+
+  Future<void> _loadUnread() async {
+    final n = await context.read<AppState>().api.unreadCount();
+    if (mounted) setState(() => _unread = n);
   }
 
   Future<void> _load({String query = ''}) async {
@@ -58,6 +66,29 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         actions: [
+          IconButton(
+            tooltip: 'Notifications',
+            icon: Stack(clipBehavior: Clip.none, children: [
+              const Icon(Icons.notifications_none),
+              if (_unread > 0)
+                Positioned(
+                  right: -3,
+                  top: -3,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                    decoration: BoxDecoration(color: AppColors.clay, borderRadius: BorderRadius.circular(999)),
+                    child: Text('${_unread > 9 ? '9+' : _unread}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w700, height: 1.2)),
+                  ),
+                ),
+            ]),
+            onPressed: () async {
+              await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NotificationsScreen()));
+              _loadUnread();
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.receipt_long_outlined),
             tooltip: 'My bookings',

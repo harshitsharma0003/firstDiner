@@ -14,6 +14,7 @@ function createMemoryStore() {
     admins: new Map(),
     customers: new Map(),
     otps: new Map(), // phone -> { code, expiresAt }
+    notifications: new Map(),
   };
 
   const all = (col) => Array.from(db[col].values());
@@ -118,6 +119,24 @@ function createMemoryStore() {
         .filter((b) => b.customerId === customerId)
         .sort((a, b) => b.createdAt - a.createdAt);
     },
+    // ---- notifications ----
+    async createNotification(n) {
+      const id = n.id || nanoid();
+      const rec = { id, createdAt: Date.now(), read: false, ...n };
+      db.notifications.set(id, rec);
+      return rec;
+    },
+    async listNotificationsForUser(userId) {
+      return all('notifications')
+        .filter((n) => n.userId === userId)
+        .sort((a, b) => b.createdAt - a.createdAt);
+    },
+    async markNotificationsRead(userId) {
+      for (const n of all('notifications')) {
+        if (n.userId === userId && !n.read) db.notifications.set(n.id, { ...n, read: true });
+      }
+    },
+
     // Count confirmed bookings for a specific slot — the capacity check.
     async countBookingsForSlot(restaurantId, date, timeSlot) {
       return all('bookings').filter(

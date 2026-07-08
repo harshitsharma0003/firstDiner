@@ -160,6 +160,22 @@ function createFirestoreStore() {
       const snap = await col('bookings').where('customerId', '==', customerId).get();
       return rows(snap).sort(byNewest);
     },
+    // ---- notifications ----
+    async createNotification(n) {
+      return setDoc('notifications', n, { createdAt: Date.now(), read: false });
+    },
+    async listNotificationsForUser(userId) {
+      const snap = await col('notifications').where('userId', '==', userId).get();
+      return rows(snap).sort(byNewest);
+    },
+    async markNotificationsRead(userId) {
+      const snap = await col('notifications').where('userId', '==', userId).where('read', '==', false).get();
+      if (snap.empty) return;
+      const batch = fs.batch();
+      snap.docs.forEach((d) => batch.update(d.ref, { read: true }));
+      await batch.commit();
+    },
+
     // Count confirmed bookings for a specific slot — the capacity check.
     // Needs the composite index documented at the top of this file.
     async countBookingsForSlot(restaurantId, date, timeSlot) {

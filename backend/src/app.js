@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const restaurantRoutes = require('./routes/restaurant');
 const customerRoutes = require('./routes/customer');
+const notificationRoutes = require('./routes/notifications');
 
 function createApp() {
   const app = express();
@@ -17,6 +18,7 @@ function createApp() {
   app.use('/api/auth', authRoutes);
   app.use('/api/admin', adminRoutes);
   app.use('/api/restaurant', restaurantRoutes);
+  app.use('/api/notifications', notificationRoutes);
   app.use('/api', customerRoutes); // /api/restaurants, /api/bookings
 
   // Fallback error handler.

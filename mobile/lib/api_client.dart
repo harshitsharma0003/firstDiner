@@ -123,4 +123,22 @@ class ApiClient {
   Future<void> cancel(String id) async {
     await _patch('/bookings/$id/cancel', {});
   }
+
+  // ---- notifications ----
+  Future<Map<String, dynamic>> notifications() async {
+    return _get('/notifications'); // { notifications: [...], unread: n }
+  }
+
+  Future<int> unreadCount() async {
+    try {
+      final data = await _get('/notifications');
+      return (data['unread'] as int?) ?? 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  Future<void> markNotificationsRead() async {
+    await _post('/notifications/read', {});
+  }
 }

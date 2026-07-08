@@ -22,10 +22,10 @@ const config = {
 
   // Demo bypass numbers: entering one of these skips real SMS and accepts the
   // paired static code. FOR DEMOS ONLY — anyone with the number + code can sign
-  // in as it. Remove before any real launch.
-  testPhoneNumbers: {
-    '+919968225190': '123456',
-  },
+  // in as it. Enabled only when DEMO_LOGIN=true; set it to false for real launch.
+  testPhoneNumbers: process.env.DEMO_LOGIN === 'true'
+    ? { '+919968225190': '123456' }
+    : {},
 
   // Seeded platform admin (change before deploying).
   seedAdmin: {
