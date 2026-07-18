@@ -6,13 +6,19 @@ let transporter;
 function getTransporter() {
   if (transporter !== undefined) return transporter;
   if (config.smtpHost && config.smtpUser) {
+    console.log(`[email] using SMTP ${config.smtpHost}:${config.smtpPort} as ${config.smtpUser}`);
     transporter = nodemailer.createTransport({
       host: config.smtpHost,
       port: config.smtpPort,
       secure: config.smtpPort === 465, // 465 = implicit TLS, 587 = STARTTLS
       auth: { user: config.smtpUser, pass: config.smtpPass },
+      // Fail fast instead of hanging when the host blocks outbound SMTP.
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
     });
   } else {
+    console.log(config.resendApiKey ? '[email] using Resend API' : '[email] not configured — logging only');
     transporter = null;
   }
   return transporter;
