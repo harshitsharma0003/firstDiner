@@ -1,0 +1,59 @@
+name: Build Web Console (Hostinger)
+
+# Produces a ready-to-upload build of the admin/restaurant console.
+# Download the artifact, extract it straight into public_html/web on Hostinger.
+# The backend URL is baked in at build time (Vite inlines VITE_API_BASE).
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'web/**'
+      - '.github/workflows/web-console.yml'
+  workflow_dispatch:
+    inputs:
+      api_base:
+        description: 'Backend API base URL to bake in'
+        default: 'https://firstdiner-api.onrender.com/api'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build console
+        env:
+          VITE_API_BASE: ${{ github.event.inputs.api_base || 'https://firstdiner-api.onrender.com/api' }}
+        run: |
+          echo "Baking API base: $VITE_API_BASE"
+          npm run build
+
+      - name: Verify output
+        run: |
+          test -f dist/web/index.html || { echo "::error::index.html missing"; exit 1; }
+          test -f dist/web/.htaccess  || { echo "::error::.htaccess missing (needed for /web/login routing)"; exit 1; }
+          grep -rq "firstdiner-api.onrender.com" dist/web/assets/ \
+            || echo "::warning::backend URL not found in the bundle — check VITE_API_BASE"
+          echo "--- build contents ---"; ls -a dist/web
+
+      - name: Upload console (extract into public_html/web)
+        uses: actions/upload-artifact@v4
+        with:
+          name: firstdiner-web-b${{ github.run_number }}
+          path: web/dist/web/
+          include-hidden-files: true   # keeps .htaccess
+          if-no-files-found: error
+          retention-days: 30

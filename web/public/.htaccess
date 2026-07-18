@@ -1,0 +1,12 @@
+# First Diner console — SPA routing under /web/ (Apache / Hostinger).
+# Real files (assets, images) are served directly; any other /web/... path
+# falls back to index.html so client-side routes like /web/login work on
+# refresh and deep links. Uses its own RewriteEngine so it does NOT inherit
+# the WordPress rules in the parent public_html/.htaccess.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /web/
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ /web/index.html [L]
+</IfModule>
