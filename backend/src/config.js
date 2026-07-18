@@ -33,10 +33,16 @@ const config = {
     password: process.env.ADMIN_PASSWORD || 'admin123',
   },
 
-  // Email (Resend). Leave RESEND_API_KEY unset to disable sending (dev).
-  // RESEND_FROM must be a verified sender/domain in your Resend account.
+  // Email. Prefers SMTP (e.g. your Hostinger mailbox) when SMTP_HOST is set,
+  // else Resend (RESEND_API_KEY), else disabled (logs only).
+  smtpHost: process.env.SMTP_HOST || '',
+  smtpPort: Number(process.env.SMTP_PORT || 465),
+  smtpUser: process.env.SMTP_USER || '',
+  smtpPass: process.env.SMTP_PASS || '',
   resendApiKey: process.env.RESEND_API_KEY || '',
-  resendFrom: process.env.RESEND_FROM || 'First Diner <onboarding@resend.dev>',
+  // From address used for all outgoing mail (must be a mailbox you own / a
+  // verified sender). e.g. "First Diner <no-reply@thefirstdiner.com>".
+  emailFrom: process.env.EMAIL_FROM || process.env.RESEND_FROM || 'First Diner <onboarding@resend.dev>',
   adminEmail: process.env.ADMIN_EMAIL || '', // for admin password reset
 };
 

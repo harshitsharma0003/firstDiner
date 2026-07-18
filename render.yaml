@@ -32,13 +32,22 @@ services:
       # Render generates a strong secret for signing app JWTs.
       - key: JWT_SECRET
         generateValue: true
-      # Email (Resend) — set these in the dashboard to enable password-reset +
-      # booking-alert emails. RESEND_FROM must be a verified sender in Resend.
+      # Email — set in the dashboard to enable password-reset + booking emails.
+      # Recommended: your Hostinger SMTP mailbox (sends from your own domain).
+      - key: SMTP_HOST        # e.g. smtp.hostinger.com
+        sync: false
+      - key: SMTP_PORT        # 465
+        sync: false
+      - key: SMTP_USER        # e.g. no-reply@thefirstdiner.com
+        sync: false
+      - key: SMTP_PASS        # that mailbox's password
+        sync: false
+      - key: EMAIL_FROM       # First Diner <no-reply@thefirstdiner.com>
+        sync: false
+      - key: ADMIN_EMAIL      # admin address for password reset
+        sync: false
+      # Alternative to SMTP: Resend API key.
       - key: RESEND_API_KEY
-        sync: false
-      - key: RESEND_FROM
-        sync: false
-      - key: ADMIN_EMAIL
         sync: false
 
   # Admin + restaurant console (one React app, role-switched at login).
