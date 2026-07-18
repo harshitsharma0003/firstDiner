@@ -53,7 +53,7 @@ export default function Login({ onAuth }) {
     <div className="center-screen">
       <div className="auth-card card">
         <div style={{ marginBottom: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-          <img src="/logo.png" alt="First Diner" style={{ height: 64, marginBottom: 12 }} />
+          <img src={import.meta.env.BASE_URL + 'logo.png'} alt="First Diner" style={{ height: 64, marginBottom: 12 }} />
           <span className="mark" style={{ fontFamily: 'Fraunces, serif', fontSize: '1.6rem', fontWeight: 700 }}>
             First <b style={{ color: 'var(--honey-deep)' }}>Diner</b>
           </span>

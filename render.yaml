@@ -63,6 +63,11 @@ services:
       - key: VITE_API_BASE
         sync: false
     routes:
+      # SPA fallback for the console, which lives under /web/.
       - type: rewrite
+        source: /web/*
+        destination: /web/index.html
+      # Send the bare domain (and anything else) to the console login.
+      - type: redirect
         source: /*
-        destination: /index.html
+        destination: /web/login
