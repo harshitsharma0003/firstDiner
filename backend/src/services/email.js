@@ -24,6 +24,22 @@ function getTransporter() {
   return transporter;
 }
 
+/** Which transport is active + its (non-secret) settings — for diagnostics. */
+function describeTransport() {
+  if (config.smtpHost && config.smtpUser) {
+    return {
+      mode: 'smtp',
+      host: config.smtpHost,
+      port: config.smtpPort,
+      user: config.smtpUser,
+      passSet: Boolean(config.smtpPass),
+      from: config.emailFrom,
+    };
+  }
+  if (config.resendApiKey) return { mode: 'resend', from: config.emailFrom };
+  return { mode: 'disabled', from: config.emailFrom };
+}
+
 /**
  * Send a transactional email. Uses SMTP (e.g. your Hostinger mailbox) when
  * SMTP_HOST is configured; otherwise the Resend API; otherwise no-ops (logs).
@@ -37,10 +53,10 @@ async function sendEmail({ to, subject, html }) {
   if (t) {
     try {
       await t.sendMail({ from: config.emailFrom, to, subject, html });
-      return { ok: true };
+      return { ok: true, via: 'smtp' };
     } catch (err) {
       console.error('[email] SMTP send failed:', err.message);
-      return { ok: false };
+      return { ok: false, via: 'smtp', error: err.message, code: err.code || null };
     }
   }
 
@@ -53,13 +69,14 @@ async function sendEmail({ to, subject, html }) {
         body: JSON.stringify({ from: config.emailFrom, to, subject, html }),
       });
       if (!res.ok) {
-        console.error('[email] Resend failed', res.status, (await res.text().catch(() => '')).slice(0, 300));
-        return { ok: false };
+        const body = (await res.text().catch(() => '')).slice(0, 300);
+        console.error('[email] Resend failed', res.status, body);
+        return { ok: false, via: 'resend', error: `HTTP ${res.status} ${body}` };
       }
-      return { ok: true };
+      return { ok: true, via: 'resend' };
     } catch (err) {
       console.error('[email] Resend error:', err.message);
-      return { ok: false };
+      return { ok: false, via: 'resend', error: err.message };
     }
   }
 
@@ -68,4 +85,4 @@ async function sendEmail({ to, subject, html }) {
   return { skipped: true };
 }
 
-module.exports = { sendEmail };
+module.exports = { sendEmail, describeTransport };

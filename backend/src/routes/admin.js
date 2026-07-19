@@ -4,7 +4,7 @@ const store = require('../data/store');
 const config = require('../config');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { hashPassword, generatePassword } = require('../auth/auth');
-const { sendEmail } = require('../services/email');
+const { sendEmail, describeTransport } = require('../services/email');
 
 const router = express.Router();
 router.use(authenticate, requireRole('admin'));
@@ -60,6 +60,23 @@ router.post('/restaurants', async (req, res) => {
 router.get('/restaurants', async (_req, res) => {
   const restaurants = await store.listRestaurants();
   res.json({ restaurants });
+});
+
+// Diagnostic: report the active email transport and attempt a real send so the
+// underlying SMTP/API error is visible without digging through host logs.
+router.post('/email-test', async (req, res) => {
+  const transport = describeTransport();
+  const to = (req.body && req.body.to) || config.adminEmail;
+  if (!to) {
+    return res.json({ transport, error: 'No recipient — pass { "to": "you@example.com" } or set ADMIN_EMAIL.' });
+  }
+  const started = Date.now();
+  const result = await sendEmail({
+    to,
+    subject: 'First Diner — email test',
+    html: '<p>If you are reading this, First Diner email delivery is working.</p>',
+  });
+  res.json({ transport, to, tookMs: Date.now() - started, result });
 });
 
 // Edit details, or enable/disable.
