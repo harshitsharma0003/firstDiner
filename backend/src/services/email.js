@@ -12,6 +12,9 @@ function getTransporter() {
       port: config.smtpPort,
       secure: config.smtpPort === 465, // 465 = implicit TLS, 587 = STARTTLS
       auth: { user: config.smtpUser, pass: config.smtpPass },
+      // Force IPv4: many hosts (Render) have no IPv6 route, and resolving the
+      // SMTP host to an AAAA record then fails with ENETUNREACH.
+      family: 4,
       // Fail fast instead of hanging when the host blocks outbound SMTP.
       connectionTimeout: 10000,
       greetingTimeout: 10000,

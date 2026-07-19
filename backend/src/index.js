@@ -1,4 +1,8 @@
 'use strict';
+// Prefer IPv4 when resolving hostnames. Some hosts (e.g. Render) have no IPv6
+// route, so an AAAA result would fail with ENETUNREACH (hit this with SMTP).
+require('dns').setDefaultResultOrder('ipv4first');
+
 const { createApp } = require('./app');
 const { seed } = require('./seed');
 const config = require('./config');
