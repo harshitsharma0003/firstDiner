@@ -4,7 +4,7 @@ const dns = require('dns').promises;
 const config = require('../config');
 
 // Bumped when the email transport logic changes, so a deploy can be confirmed.
-const EMAIL_BUILD = 'ipv4-literal-1';
+const EMAIL_BUILD = 'resend-first-1';
 
 let transporterPromise;
 
@@ -55,6 +55,9 @@ function getTransporter() {
 
 /** Which transport is active + its (non-secret) settings — for diagnostics. */
 function describeTransport() {
+  // Resend (HTTPS) wins when configured: many hosts (Render) block outbound
+  // SMTP ports entirely, so the API is the reliable path.
+  if (config.resendApiKey) return { build: EMAIL_BUILD, mode: 'resend', from: config.emailFrom };
   if (config.smtpHost && config.smtpUser) {
     return {
       build: EMAIL_BUILD,
@@ -71,26 +74,16 @@ function describeTransport() {
 }
 
 /**
- * Send a transactional email. Uses SMTP (e.g. your Hostinger mailbox) when
- * SMTP_HOST is configured; otherwise the Resend API; otherwise no-ops (logs).
- * Never throws — email must not break the request that triggered it.
+ * Send a transactional email.
+ * Order matters: the Resend HTTPS API is tried first when RESEND_API_KEY is
+ * set, because hosts like Render silently drop outbound SMTP (ports 25/465/587
+ * all time out). SMTP is used only when there's no Resend key. Never throws —
+ * email must not break the request that triggered it.
  */
 async function sendEmail({ to, subject, html }) {
   if (!to) return { skipped: true };
 
-  // 1. SMTP (preferred — sends from your own domain mailbox).
-  const t = await getTransporter();
-  if (t) {
-    try {
-      await t.sendMail({ from: config.emailFrom, to, subject, html });
-      return { ok: true, via: 'smtp' };
-    } catch (err) {
-      console.error('[email] SMTP send failed:', err.message);
-      return { ok: false, via: 'smtp', error: err.message, code: err.code || null };
-    }
-  }
-
-  // 2. Resend API fallback.
+  // 1. Resend API (HTTPS — works anywhere).
   if (config.resendApiKey) {
     try {
       const res = await fetch('https://api.resend.com/emails', {
@@ -107,6 +100,18 @@ async function sendEmail({ to, subject, html }) {
     } catch (err) {
       console.error('[email] Resend error:', err.message);
       return { ok: false, via: 'resend', error: err.message };
+    }
+  }
+
+  // 2. SMTP (your own mailbox) — only when Resend isn't configured.
+  const t = await getTransporter();
+  if (t) {
+    try {
+      await t.sendMail({ from: config.emailFrom, to, subject, html });
+      return { ok: true, via: 'smtp' };
+    } catch (err) {
+      console.error('[email] SMTP send failed:', err.message);
+      return { ok: false, via: 'smtp', error: err.message, code: err.code || null };
     }
   }
 
