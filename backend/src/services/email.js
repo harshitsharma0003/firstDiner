@@ -1,36 +1,63 @@
 'use strict';
 const nodemailer = require('nodemailer');
+const dns = require('dns').promises;
 const config = require('../config');
 
-let transporter;
+// Bumped when the email transport logic changes, so a deploy can be confirmed.
+const EMAIL_BUILD = 'ipv4-literal-1';
+
+let transporterPromise;
+
+/**
+ * Build the SMTP transport, connecting to an explicit IPv4 address.
+ * nodemailer resolves hostnames itself, so Node's dns result-order and the
+ * `family` option don't reliably stop it picking an AAAA record — and hosts
+ * like Render have no IPv6 route (ENETUNREACH). Resolving the A record here
+ * and passing tls.servername keeps certificate validation correct.
+ */
 function getTransporter() {
-  if (transporter !== undefined) return transporter;
-  if (config.smtpHost && config.smtpUser) {
-    console.log(`[email] using SMTP ${config.smtpHost}:${config.smtpPort} as ${config.smtpUser}`);
-    transporter = nodemailer.createTransport({
-      host: config.smtpHost,
+  if (transporterPromise !== undefined) return transporterPromise;
+
+  if (!(config.smtpHost && config.smtpUser)) {
+    console.log(config.resendApiKey ? '[email] using Resend API' : '[email] not configured — logging only');
+    transporterPromise = Promise.resolve(null);
+    return transporterPromise;
+  }
+
+  transporterPromise = (async () => {
+    let host = config.smtpHost;
+    let servername;
+    try {
+      const [ipv4] = await dns.resolve4(config.smtpHost);
+      if (ipv4) {
+        servername = config.smtpHost; // keep TLS cert matching the real hostname
+        host = ipv4;
+        console.log(`[email] SMTP ${config.smtpHost} -> ${ipv4}:${config.smtpPort} as ${config.smtpUser} (IPv4)`);
+      }
+    } catch (err) {
+      console.warn('[email] IPv4 resolve failed, falling back to hostname:', err.message);
+    }
+    return nodemailer.createTransport({
+      host,
       port: config.smtpPort,
       secure: config.smtpPort === 465, // 465 = implicit TLS, 587 = STARTTLS
       auth: { user: config.smtpUser, pass: config.smtpPass },
-      // Force IPv4: many hosts (Render) have no IPv6 route, and resolving the
-      // SMTP host to an AAAA record then fails with ENETUNREACH.
       family: 4,
-      // Fail fast instead of hanging when the host blocks outbound SMTP.
+      ...(servername ? { tls: { servername } } : {}),
+      // Fail fast rather than hanging.
       connectionTimeout: 10000,
       greetingTimeout: 10000,
       socketTimeout: 15000,
     });
-  } else {
-    console.log(config.resendApiKey ? '[email] using Resend API' : '[email] not configured — logging only');
-    transporter = null;
-  }
-  return transporter;
+  })();
+  return transporterPromise;
 }
 
 /** Which transport is active + its (non-secret) settings — for diagnostics. */
 function describeTransport() {
   if (config.smtpHost && config.smtpUser) {
     return {
+      build: EMAIL_BUILD,
       mode: 'smtp',
       host: config.smtpHost,
       port: config.smtpPort,
@@ -52,7 +79,7 @@ async function sendEmail({ to, subject, html }) {
   if (!to) return { skipped: true };
 
   // 1. SMTP (preferred — sends from your own domain mailbox).
-  const t = getTransporter();
+  const t = await getTransporter();
   if (t) {
     try {
       await t.sendMail({ from: config.emailFrom, to, subject, html });
