@@ -4,7 +4,7 @@ const store = require('../data/store');
 const config = require('../config');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { hashPassword, generatePassword } = require('../auth/auth');
-const { sendEmail, describeTransport } = require('../services/email');
+const { sendEmail, describeTransport, testSmtpPort } = require('../services/email');
 
 const router = express.Router();
 router.use(authenticate, requireRole('admin'));
@@ -70,6 +70,15 @@ router.post('/email-test', async (req, res) => {
   if (!to) {
     return res.json({ transport, error: 'No recipient — pass { "to": "you@example.com" } or set ADMIN_EMAIL.' });
   }
+  // { probe: true } tries each common SMTP port so we can tell a blocked port
+  // (timeout) apart from bad credentials (auth error).
+  if (req.body && req.body.probe) {
+    const ports = req.body.ports || [465, 587, 25, 2525];
+    const results = [];
+    for (const p of ports) results.push(await testSmtpPort(p, to));
+    return res.json({ transport, to, probe: results });
+  }
+
   const started = Date.now();
   const result = await sendEmail({
     to,

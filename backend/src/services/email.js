@@ -115,4 +115,38 @@ async function sendEmail({ to, subject, html }) {
   return { skipped: true };
 }
 
-module.exports = { sendEmail, describeTransport };
+/**
+ * Diagnostics only: try a real SMTP send on a specific port, so we can tell
+ * "the host blocks this port" apart from "the credentials are wrong".
+ */
+async function testSmtpPort(port, to) {
+  if (!(config.smtpHost && config.smtpUser)) return { port, ok: false, error: 'SMTP not configured' };
+  let host = config.smtpHost;
+  let servername;
+  try {
+    const [ipv4] = await dns.resolve4(config.smtpHost);
+    if (ipv4) { servername = config.smtpHost; host = ipv4; }
+  } catch (_) { /* fall back to hostname */ }
+  const t = nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: { user: config.smtpUser, pass: config.smtpPass },
+    family: 4,
+    ...(servername ? { tls: { servername } } : {}),
+    connectionTimeout: 8000,
+    greetingTimeout: 8000,
+    socketTimeout: 12000,
+  });
+  const started = Date.now();
+  try {
+    await t.sendMail({ from: config.emailFrom, to, subject: `First Diner — SMTP test (port ${port})`, html: '<p>SMTP port test.</p>' });
+    return { port, ok: true, tookMs: Date.now() - started };
+  } catch (err) {
+    return { port, ok: false, tookMs: Date.now() - started, error: err.message, code: err.code || null };
+  } finally {
+    try { t.close(); } catch (_) { /* ignore */ }
+  }
+}
+
+module.exports = { sendEmail, describeTransport, testSmtpPort };
