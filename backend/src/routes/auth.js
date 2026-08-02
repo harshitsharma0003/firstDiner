@@ -41,12 +41,20 @@ router.post('/forgot-password', async (req, res) => {
   const email = (req.body && req.body.email ? String(req.body.email) : '').trim().toLowerCase();
   if (!email) return res.status(400).json({ error: 'Enter your email.' });
   try {
-    let admin = await store.findAdminByEmail(email);
-    // Fallback: the seeded admin has no email field — match against ADMIN_EMAIL.
-    if (!admin && config.adminEmail && email === config.adminEmail.trim().toLowerCase()) {
-      admin = await store.findAdminByUsername(config.seedAdmin.username);
+    // Resolve the account by its real email field first (restaurant, then
+    // admin). The ADMIN_EMAIL config is only a last-resort fallback for the
+    // seeded admin (which has no email field) — it must NOT shadow a real
+    // restaurant that happens to use the same address.
+    let account = await store.findRestaurantUserByEmail(email);
+    let isAdmin = false;
+    if (!account) {
+      const adminByEmail = await store.findAdminByEmail(email);
+      if (adminByEmail) { account = adminByEmail; isAdmin = true; }
     }
-    const account = admin || (await store.findRestaurantUserByEmail(email));
+    if (!account && config.adminEmail && email === config.adminEmail.trim().toLowerCase()) {
+      account = await store.findAdminByUsername(config.seedAdmin.username);
+      isAdmin = true;
+    }
 
     if (account) {
       // Send the new password FIRST; only commit the reset if it actually
@@ -66,7 +74,7 @@ router.post('/forgot-password', async (req, res) => {
       });
       if (result && result.ok) {
         const patch = { passwordHash: hashPassword(newPassword) };
-        if (admin) await store.updateAdmin(account.id, patch);
+        if (isAdmin) await store.updateAdmin(account.id, patch);
         else await store.updateRestaurantUser(account.id, patch);
       } else {
         console.error('[forgot-password] email not sent — password left unchanged:', result && result.error);

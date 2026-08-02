@@ -6,7 +6,7 @@ export default function AdminDashboard({ session }) {
   const [error, setError] = useState('');
   const [creating, setCreating] = useState(false);
   const [newCreds, setNewCreds] = useState(null);
-  const [form, setForm] = useState({ name: '', username: '', email: '', city: '', address: '', description: '' });
+  const [form, setForm] = useState({ name: '', username: '', email: '', phone: '', city: '', address: '', description: '' });
 
   async function refresh() {
     try {
@@ -27,11 +27,12 @@ export default function AdminDashboard({ session }) {
         name: form.name,
         username: form.username,
         email: form.email,
+        phone: form.phone,
         description: form.description,
         location: { city: form.city, address: form.address, lat: null, lng: null },
       });
       setNewCreds(res.credentials);
-      setForm({ name: '', username: '', email: '', city: '', address: '', description: '' });
+      setForm({ name: '', username: '', email: '', phone: '', city: '', address: '', description: '' });
       setCreating(false);
       refresh();
     } catch (err) {
@@ -82,8 +83,12 @@ export default function AdminDashboard({ session }) {
               <div className="field"><label>Login username</label>
                 <input type="text" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} required /></div>
             </div>
-            <div className="field"><label>Owner email <span className="muted" style={{ fontWeight: 400 }}>(gets the login + booking alerts)</span></label>
-              <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="owner@restaurant.com" /></div>
+            <div className="row">
+              <div className="field"><label>Owner email <span className="muted" style={{ fontWeight: 400 }}>(login + booking alerts)</span></label>
+                <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="owner@restaurant.com" /></div>
+              <div className="field"><label>Phone <span className="muted" style={{ fontWeight: 400 }}>(WhatsApp booking alerts, +91)</span></label>
+                <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="98765 43210" /></div>
+            </div>
             <div className="row">
               <div className="field"><label>City</label>
                 <input type="text" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
