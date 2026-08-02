@@ -7,6 +7,8 @@ export default function AdminDashboard({ session }) {
   const [creating, setCreating] = useState(false);
   const [newCreds, setNewCreds] = useState(null);
   const [form, setForm] = useState({ name: '', username: '', email: '', phone: '', city: '', address: '', description: '' });
+  const [editing, setEditing] = useState(null); // restaurant id being edited
+  const [editForm, setEditForm] = useState({ email: '', phone: '' });
 
   async function refresh() {
     try {
@@ -48,6 +50,21 @@ export default function AdminDashboard({ session }) {
   async function resetPw(r) {
     const res = await api.resetPassword(session.token, r.id);
     setNewCreds(res.credentials);
+  }
+
+  function startEdit(r) {
+    setEditing(r.id);
+    setEditForm({ email: r.ownerEmail || '', phone: r.phone || '' });
+    setError('');
+  }
+  async function saveContact(r) {
+    try {
+      await api.updateRestaurant(session.token, r.id, { email: editForm.email, phone: editForm.phone });
+      setEditing(null);
+      refresh();
+    } catch (err) {
+      setError(err.message);
+    }
   }
 
   return (
@@ -106,20 +123,39 @@ export default function AdminDashboard({ session }) {
         <div className="card-head"><h2>All restaurants</h2><span className="muted">{restaurants.length} total</span></div>
         {restaurants.length === 0 && <p className="muted">No restaurants yet. Onboard your first one above.</p>}
         {restaurants.map((r) => (
-          <div className="list-item" key={r.id}>
-            <div>
-              <div style={{ fontWeight: 600 }}>{r.name}</div>
-              <div className="muted" style={{ fontSize: '0.85rem' }}>
-                {r.location?.city || '—'} · {r.discountPercent}% off · {r.maxTables} tables
+          <div key={r.id} style={{ borderBottom: '1px solid var(--line)' }}>
+            <div className="list-item" style={{ borderBottom: 'none' }}>
+              <div>
+                <div style={{ fontWeight: 600 }}>{r.name}</div>
+                <div className="muted" style={{ fontSize: '0.85rem' }}>
+                  {r.location?.city || '—'} · {r.discountPercent}% off · {r.maxTables} tables
+                </div>
+                <div className="muted" style={{ fontSize: '0.8rem', marginTop: 2 }}>
+                  ✉ {r.ownerEmail || 'no email'} · ☎ {r.phone || 'no phone'}
+                </div>
+              </div>
+              <div className="spread">
+                <span className={`chip ${r.enabled ? 'on' : 'off'}`}>{r.enabled ? 'Live' : 'Disabled'}</span>
+                <button className="ghost sm" onClick={() => (editing === r.id ? setEditing(null) : startEdit(r))}>
+                  {editing === r.id ? 'Close' : 'Edit'}
+                </button>
+                <button className="ghost sm" onClick={() => resetPw(r)}>Reset password</button>
+                <button className={`sm ${r.enabled ? 'danger' : ''}`} onClick={() => toggleEnabled(r)}>
+                  {r.enabled ? 'Disable' : 'Enable'}
+                </button>
               </div>
             </div>
-            <div className="spread">
-              <span className={`chip ${r.enabled ? 'on' : 'off'}`}>{r.enabled ? 'Live' : 'Disabled'}</span>
-              <button className="ghost sm" onClick={() => resetPw(r)}>Reset password</button>
-              <button className={`sm ${r.enabled ? 'danger' : ''}`} onClick={() => toggleEnabled(r)}>
-                {r.enabled ? 'Disable' : 'Enable'}
-              </button>
-            </div>
+            {editing === r.id && (
+              <div style={{ padding: '4px 0 16px' }}>
+                <div className="row">
+                  <div className="field"><label>Owner email <span className="muted" style={{ fontWeight: 400 }}>(login + booking alerts)</span></label>
+                    <input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} placeholder="owner@restaurant.com" /></div>
+                  <div className="field"><label>Phone <span className="muted" style={{ fontWeight: 400 }}>(WhatsApp, +91)</span></label>
+                    <input type="tel" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} placeholder="98765 43210" /></div>
+                </div>
+                <button className="sm" onClick={() => saveContact(r)}>Save contact</button>
+              </div>
+            )}
           </div>
         ))}
       </div>

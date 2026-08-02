@@ -72,7 +72,16 @@ router.post('/restaurants', async (req, res) => {
 
 router.get('/restaurants', async (_req, res) => {
   const restaurants = await store.listRestaurants();
-  res.json({ restaurants });
+  // Attach the owner's email (stored on the owner user) so the console can
+  // display and edit contact details.
+  const withOwner = await Promise.all(
+    restaurants.map(async (r) => {
+      const users = await store.listRestaurantUsers(r.id);
+      const owner = users.find((u) => u.role === 'owner');
+      return { ...r, ownerEmail: (owner && owner.email) || '', ownerUsername: (owner && owner.username) || '' };
+    })
+  );
+  res.json({ restaurants: withOwner });
 });
 
 // Diagnostic: report the active email transport and attempt a real send so the
@@ -126,6 +135,12 @@ router.patch('/restaurants/:id', async (req, res) => {
   if ('phone' in (req.body || {})) patch.phone = normalizeIndianPhone(req.body.phone);
   const updated = await store.updateRestaurant(req.params.id, patch);
   if (!updated) return res.status(404).json({ error: 'Restaurant not found.' });
+  // Owner email lives on the owner user, not the restaurant doc.
+  if ('email' in (req.body || {})) {
+    const users = await store.listRestaurantUsers(req.params.id);
+    const owner = users.find((u) => u.role === 'owner');
+    if (owner) await store.updateRestaurantUser(owner.id, { email: String(req.body.email || '').trim().toLowerCase() });
+  }
   res.json({ restaurant: updated });
 });
 
