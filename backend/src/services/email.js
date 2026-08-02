@@ -90,6 +90,7 @@ async function sendEmail({ to, subject, html }) {
         method: 'POST',
         headers: { Authorization: `Bearer ${config.resendApiKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ from: config.emailFrom, to, subject, html }),
+        signal: AbortSignal.timeout(15000), // never hang the request
       });
       if (!res.ok) {
         const body = (await res.text().catch(() => '')).slice(0, 300);

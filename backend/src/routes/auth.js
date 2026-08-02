@@ -48,20 +48,13 @@ router.post('/forgot-password', async (req, res) => {
     }
     const account = admin || (await store.findRestaurantUserByEmail(email));
 
-    let newPassword = null;
     if (account) {
-      newPassword = generatePassword();
-      const patch = { passwordHash: hashPassword(newPassword) };
-      if (admin) await store.updateAdmin(account.id, patch);
-      else await store.updateRestaurantUser(account.id, patch);
-    }
-
-    // Reply straight away — identical whether or not the email exists (no
-    // account enumeration). Email delivery must never block/hang the request.
-    res.json({ ok: true, message: 'If that email is registered, a new password has been sent.' });
-
-    if (account) {
-      sendEmail({
+      // Send the new password FIRST; only commit the reset if it actually
+      // sent — otherwise a failed email would lock the user out of an account
+      // whose password just changed. sendEmail never throws and is bounded by
+      // a 15s timeout, so this can't hang the request.
+      const newPassword = generatePassword();
+      const result = await sendEmail({
         to: email,
         subject: 'First Diner — your new console password',
         html: `<div style="font-family:Arial,sans-serif;color:#241d2b">
@@ -70,8 +63,18 @@ router.post('/forgot-password', async (req, res) => {
           <p><b>Username:</b> ${account.username}<br/>
              <b>New password:</b> <code style="background:#f5eee4;padding:2px 6px;border-radius:4px">${newPassword}</code></p>
           <p>Sign in at the console and change it whenever you like.</p></div>`,
-      }).catch((err) => console.error('[forgot-password] email send failed:', err.message));
+      });
+      if (result && result.ok) {
+        const patch = { passwordHash: hashPassword(newPassword) };
+        if (admin) await store.updateAdmin(account.id, patch);
+        else await store.updateRestaurantUser(account.id, patch);
+      } else {
+        console.error('[forgot-password] email not sent — password left unchanged:', result && result.error);
+      }
     }
+
+    // Identical response whether or not the email exists (no account enumeration).
+    res.json({ ok: true, message: 'If that email is registered, a new password has been sent.' });
   } catch (err) {
     console.error('[forgot-password] error:', err.message);
     if (!res.headersSent) res.status(503).json({ error: 'Could not process the request. Please try again.' });
