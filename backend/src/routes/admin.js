@@ -5,6 +5,7 @@ const config = require('../config');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { hashPassword, generatePassword } = require('../auth/auth');
 const { sendEmail, describeTransport, testSmtpPort } = require('../services/email');
+const { sendBookingWhatsApp, whatsappConfigured } = require('../services/whatsapp');
 
 const router = express.Router();
 
@@ -98,6 +99,23 @@ router.post('/email-test', async (req, res) => {
     html: '<p>If you are reading this, First Diner email delivery is working.</p>',
   });
   res.json({ transport, to, tookMs: Date.now() - started, result });
+});
+
+// Diagnostic: send the booking-alert WhatsApp template to a number.
+// Body: { "to": "+919812345678" } (a valid WhatsApp number).
+router.post('/whatsapp-test', async (req, res) => {
+  const to = req.body && req.body.to;
+  if (!to) return res.status(400).json({ error: 'Pass { "to": "+91XXXXXXXXXX" }.' });
+  const started = Date.now();
+  const result = await sendBookingWhatsApp({
+    phone: to,
+    restaurantName: 'First Diner Demo',
+    bookingName: 'Test Guest',
+    partySize: 2,
+    date: new Date().toISOString().slice(0, 10),
+    timeSlot: '20:00',
+  });
+  res.json({ configured: whatsappConfigured(), template: config.whatsappBookingTemplate, to, tookMs: Date.now() - started, result });
 });
 
 // Edit details, or enable/disable.

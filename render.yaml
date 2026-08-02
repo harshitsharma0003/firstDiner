@@ -49,6 +49,13 @@ services:
       # Alternative to SMTP: Resend API key.
       - key: RESEND_API_KEY
         sync: false
+      # WhatsApp booking alerts via Interakt (approved template required).
+      - key: INTERAKT_API_KEY
+        sync: false
+      - key: WHATSAPP_BOOKING_TEMPLATE   # your approved template name, e.g. new_booking
+        sync: false
+      - key: WHATSAPP_TEMPLATE_LANG      # e.g. en
+        sync: false
 
   # Admin + restaurant console (one React app, role-switched at login).
   - type: web

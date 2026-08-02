@@ -44,6 +44,13 @@ const config = {
   // verified sender). e.g. "First Diner <no-reply@thefirstdiner.com>".
   emailFrom: process.env.EMAIL_FROM || process.env.RESEND_FROM || 'First Diner <onboarding@resend.dev>',
   adminEmail: process.env.ADMIN_EMAIL || '', // for admin password reset
+
+  // WhatsApp booking alerts via Interakt. Leave INTERAKT_API_KEY unset to
+  // disable. The template must be approved in Interakt with 5 body variables
+  // (restaurant, guest, party size, date, time).
+  interaktApiKey: process.env.INTERAKT_API_KEY || '',
+  whatsappBookingTemplate: process.env.WHATSAPP_BOOKING_TEMPLATE || 'new_booking',
+  whatsappTemplateLang: process.env.WHATSAPP_TEMPLATE_LANG || 'en',
 };
 
 module.exports = config;

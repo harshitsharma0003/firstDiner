@@ -4,6 +4,7 @@ const store = require('../data/store');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { buildDayAvailability, validateBooking } = require('../logic/availability');
 const { sendEmail } = require('../services/email');
+const { sendBookingWhatsApp } = require('../services/whatsapp');
 
 const router = express.Router();
 
@@ -113,6 +114,18 @@ router.post('/bookings', authenticate, requireRole('customer'), async (req, res)
           })
         )
       );
+      // WhatsApp the restaurant's contact number (Interakt), if set.
+      if (restaurant.phone) {
+        await sendBookingWhatsApp({
+          phone: restaurant.phone,
+          restaurantName: restaurant.name,
+          bookingName,
+          partySize: Number(partySize),
+          date,
+          timeSlot,
+        });
+      }
+
       // Email the restaurant owner the booking details.
       const owner = staff.find((u) => u.role === 'owner');
       if (owner && owner.email) {
