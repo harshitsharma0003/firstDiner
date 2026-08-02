@@ -76,9 +76,13 @@ router.get('/restaurants', async (_req, res) => {
   // display and edit contact details.
   const withOwner = await Promise.all(
     restaurants.map(async (r) => {
-      const users = await store.listRestaurantUsers(r.id);
-      const owner = users.find((u) => u.role === 'owner');
-      return { ...r, ownerEmail: (owner && owner.email) || '', ownerUsername: (owner && owner.username) || '' };
+      try {
+        const users = await store.listRestaurantUsers(r.id);
+        const owner = users.find((u) => u.role === 'owner');
+        return { ...r, ownerEmail: (owner && owner.email) || '', ownerUsername: (owner && owner.username) || '' };
+      } catch (err) {
+        return { ...r, ownerEmail: '', ownerUsername: '' }; // never fail the whole list
+      }
     })
   );
   res.json({ restaurants: withOwner });
