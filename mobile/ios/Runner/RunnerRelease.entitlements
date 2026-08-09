@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Release/TestFlight/App Store builds run against PRODUCTION APNs.
+	     Firebase Phone Auth verifies the app with a silent push before sending the
+	     SMS, so a 'development' value here would register the token against the
+	     sandbox, the push would never arrive, and no OTP would be sent.
+	     Debug/Profile builds use Runner.entitlements ('development'). -->
+	<key>aps-environment</key>
+	<string>production</string>
+	<key>com.apple.developer.applesignin</key>
+	<array>
+		<string>Default</string>
+	</array>
+</dict>
+</plist>

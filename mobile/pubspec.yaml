@@ -16,9 +16,13 @@ dependencies:
   google_fonts: ^6.2.1   # Inter (UI) + Fraunces (display), matching the web console
 
   # Production phone auth (see lib/api_client.dart + lib/screens/login.dart).
-  # `flutterfire configure` may bump these to versions matching your Flutter SDK.
-  firebase_core: ^2.31.0
-  firebase_auth: ^4.19.0
+  # Versions match the Newspresso / DJP Mart apps, where iOS phone OTP works.
+  # firebase_messaging is required, not optional: Firebase verifies the app via a
+  # silent APNs push before it will send the SMS. Without it, iOS falls back to
+  # reCAPTCHA (or stalls) and no OTP is ever dispatched.
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.0
+  firebase_messaging: ^15.0.0
 
 dev_dependencies:
   flutter_lints: ^3.0.0

@@ -18,13 +18,15 @@ TextStyle fraunces({
     );
 
 class Config {
-  // Point this at your backend.
-  //  - Android emulator reaches your host machine at 10.0.2.2
-  //  - iOS simulator / web can use localhost
-  //  - A real device needs your machine's LAN IP (e.g. http://192.168.1.20:4000)
+  // Production backend: the firstDiner API deployed as a Cloud Function on
+  // firstdiner-473d4f (backend/src/functionsMain.js), so the app works without
+  // any local server. Override for local dev against `npm start` in backend/:
+  //   flutter run --dart-define=API_BASE=http://10.0.2.2:4000/api        (Android emulator)
+  //   flutter run --dart-define=API_BASE=http://localhost:4000/api       (iOS simulator / web)
+  //   flutter run --dart-define=API_BASE=http://<mac-lan-ip>:4000/api    (real device)
   static const String apiBase = String.fromEnvironment(
     'API_BASE',
-    defaultValue: 'http://10.0.2.2:4000/api',
+    defaultValue: 'https://asia-south1-firstdiner-473d4f.cloudfunctions.net/api/api',
   );
 }
 
