@@ -1,0 +1,85 @@
+name: Build Android Release AAB
+
+# Builds a SIGNED release App Bundle (.aab) for Google Play upload.
+# Signing uses an upload keystore stored as repo secrets (never committed):
+#   ANDROID_KEYSTORE_BASE64  - base64 of the upload .jks (single line)
+#   ANDROID_STORE_PASSWORD   - keystore password
+#   ANDROID_KEY_PASSWORD     - key password (same as store password here)
+#   ANDROID_KEY_ALIAS        - key alias (e.g. "upload")
+#
+# Run it from the Actions tab (workflow_dispatch). Download the .aab artifact
+# and upload it to Play Console (Internal testing -> Closed testing).
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_base:
+        description: 'Backend API base URL baked into the app.'
+        default: 'https://firstdiner-api.onrender.com/api'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.4'
+          channel: stable
+          cache: true
+
+      - name: Restore upload keystore from secrets
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/upload-keystore.jks
+          {
+            echo "storePassword=${{ secrets.ANDROID_STORE_PASSWORD }}"
+            echo "keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}"
+            echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}"
+            echo "storeFile=upload-keystore.jks"
+          } > android/key.properties
+          echo "keystore restored ($(wc -c < android/app/upload-keystore.jks) bytes)"
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build signed AAB
+        run: |
+          EXTRA=""
+          if [ -n "${{ github.event.inputs.api_base }}" ]; then
+            EXTRA="--dart-define=API_BASE=${{ github.event.inputs.api_base }}"
+            echo "Baking API_BASE=${{ github.event.inputs.api_base }}"
+          fi
+          flutter build appbundle --release --build-number=${{ github.run_number }} $EXTRA
+
+      - name: Verify the AAB is signed with the upload key (not debug)
+        run: |
+          "$JAVA_HOME/bin/keytool" -printcert -jarfile build/app/outputs/bundle/release/app-release.aab | grep -i "Owner:" | head -1
+
+      - name: Name the AAB with build number
+        run: |
+          cp build/app/outputs/bundle/release/app-release.aab "firstDiner-b${{ github.run_number }}.aab"
+          ls -lh firstDiner-*.aab
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: firstDiner-aab-b${{ github.run_number }}
+          path: mobile/firstDiner-*.aab
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Clean up signing material
+        if: always()
+        run: rm -f android/app/upload-keystore.jks android/key.properties
