@@ -172,4 +172,13 @@ router.patch('/bookings/:id/cancel', authenticate, requireRole('customer'), asyn
   res.json({ booking: updated });
 });
 
+// ---- Delete own account (and everything we hold about it) ----
+router.delete('/customer/me', authenticate, requireRole('customer'), async (req, res) => {
+  await store.deleteBookingsForCustomer(req.user.sub);
+  await store.deleteNotificationsForUser(req.user.sub);
+  await store.clearOtp(req.user.phone);
+  await store.deleteCustomer(req.user.sub);
+  res.json({ ok: true });
+});
+
 module.exports = router;

@@ -43,6 +43,11 @@ class ApiClient {
     return _decode(res);
   }
 
+  Future<Map<String, dynamic>> _delete(String path) async {
+    final res = await http.delete(Uri.parse('${Config.apiBase}$path'), headers: _headers);
+    return _decode(res);
+  }
+
   Map<String, dynamic> _decode(http.Response res) {
     final data = jsonDecode(res.body) as Map<String, dynamic>;
     if (res.statusCode >= 400) {
@@ -76,6 +81,12 @@ class ApiClient {
     final data = await _post('/auth/customer/verify-otp', {'phone': phone, 'code': code});
     token = data['token'];
     return token!;
+  }
+
+  /// Permanently deletes the signed-in customer's account and all data we
+  /// hold about them (bookings, notifications, pending OTP).
+  Future<void> deleteAccount() async {
+    await _delete('/customer/me');
   }
 
   // ---- discovery ----

@@ -102,6 +102,9 @@ function createMemoryStore() {
       }
       return cust;
     },
+    async deleteCustomer(id) {
+      db.customers.delete(id);
+    },
 
     // ---- otp ----
     async saveOtp(phone, record) {
@@ -141,6 +144,11 @@ function createMemoryStore() {
         .filter((b) => b.customerId === customerId)
         .sort((a, b) => b.createdAt - a.createdAt);
     },
+    async deleteBookingsForCustomer(customerId) {
+      for (const b of all('bookings')) {
+        if (b.customerId === customerId) db.bookings.delete(b.id);
+      }
+    },
     // ---- notifications ----
     async createNotification(n) {
       const id = n.id || nanoid();
@@ -156,6 +164,11 @@ function createMemoryStore() {
     async markNotificationsRead(userId) {
       for (const n of all('notifications')) {
         if (n.userId === userId && !n.read) db.notifications.set(n.id, { ...n, read: true });
+      }
+    },
+    async deleteNotificationsForUser(userId) {
+      for (const n of all('notifications')) {
+        if (n.userId === userId) db.notifications.delete(n.id);
       }
     },
 

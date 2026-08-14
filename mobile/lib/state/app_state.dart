@@ -36,4 +36,11 @@ class AppState extends ChangeNotifier {
     await prefs.remove('phone');
     notifyListeners();
   }
+
+  /// Permanently deletes the account on the backend, then clears the local
+  /// session the same way [signOut] does.
+  Future<void> deleteAccount() async {
+    await api.deleteAccount();
+    await signOut();
+  }
 }

@@ -50,6 +50,37 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _confirmDeleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: const Text('Delete account?'),
+        content: const Text(
+            'This permanently deletes your account, bookings, and notifications. '
+            'We will hold no information about you. This cannot be undone.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await context.read<AppState>().deleteAccount();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      return;
+    }
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const SplashScreen()), (_) => false);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,15 +125,26 @@ class _HomeScreenState extends State<HomeScreen> {
             tooltip: 'My bookings',
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MyBookingsScreen())),
           ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Sign out',
-            onPressed: () async {
-              await context.read<AppState>().signOut();
-              if (!mounted) return;
-              Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (_) => const SplashScreen()), (_) => false);
+          PopupMenuButton<String>(
+            tooltip: 'Account',
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) async {
+              if (value == 'signout') {
+                await context.read<AppState>().signOut();
+                if (!mounted) return;
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const SplashScreen()), (_) => false);
+              } else if (value == 'delete') {
+                _confirmDeleteAccount();
+              }
             },
+            itemBuilder: (_) => const [
+              PopupMenuItem(value: 'signout', child: Text('Sign out')),
+              PopupMenuItem(
+                value: 'delete',
+                child: Text('Delete account', style: TextStyle(color: Colors.red)),
+              ),
+            ],
           ),
         ],
       ),

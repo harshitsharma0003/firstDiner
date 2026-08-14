@@ -143,6 +143,9 @@ function createFirestoreStore() {
       if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
       return setDoc('customers', { phoneNumber: phone }, { createdAt: Date.now() });
     },
+    async deleteCustomer(id) {
+      await col('customers').doc(id).delete();
+    },
 
     // ---- otp (one document per phone number) ----
     async saveOtp(phone, record) {
@@ -174,6 +177,13 @@ function createFirestoreStore() {
       const snap = await col('bookings').where('customerId', '==', customerId).get();
       return rows(snap).sort(byNewest);
     },
+    async deleteBookingsForCustomer(customerId) {
+      const snap = await col('bookings').where('customerId', '==', customerId).get();
+      if (snap.empty) return;
+      const batch = fs.batch();
+      snap.docs.forEach((d) => batch.delete(d.ref));
+      await batch.commit();
+    },
     // ---- notifications ----
     async createNotification(n) {
       return setDoc('notifications', n, { createdAt: Date.now(), read: false });
@@ -187,6 +197,13 @@ function createFirestoreStore() {
       if (snap.empty) return;
       const batch = fs.batch();
       snap.docs.forEach((d) => batch.update(d.ref, { read: true }));
+      await batch.commit();
+    },
+    async deleteNotificationsForUser(userId) {
+      const snap = await col('notifications').where('userId', '==', userId).get();
+      if (snap.empty) return;
+      const batch = fs.batch();
+      snap.docs.forEach((d) => batch.delete(d.ref));
       await batch.commit();
     },
 
